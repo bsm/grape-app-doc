@@ -34,8 +34,8 @@ class Grape::App::Doc::Entity
     @attributes ||= @entity.root_exposures.map do |exp|
       opts = exp.documentation.try(:dup) || {}
       opts[:type] = exp.using_class if exp.respond_to?(:using_class)
-      Grape::App::Doc::Attribute.new(exp.key, opts)
-    end
+      Grape::App::Doc::Attribute.new(exp.key, opts) unless opts.blank?
+    end.compact
   end
 
 end

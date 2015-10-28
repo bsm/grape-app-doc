@@ -15,11 +15,10 @@ class Grape::App::Doc::Endpoint < SimpleDelegator
            :to_s,
            to: '__getobj__'
 
-  attr_reader :entity, :host
+  attr_reader :status, :entity, :host
 
-  def initialize(host, obj, entity)
-    @host   = host
-    @entity = entity
+  def initialize(host, obj, status, entity)
+    @host, @status, @entity = host, status, entity
     super(obj)
   end
 

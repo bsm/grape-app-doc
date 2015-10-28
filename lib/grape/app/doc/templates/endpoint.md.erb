@@ -8,13 +8,13 @@ Authorization: Bearer YOUR-API-ACCESS-TOKEN
 ```
 
 ```http
-HTTP/1.1 200 OK
+HTTP/1.1 <%= status %> OK
 Content-Type: application/json
 
-<%= JSON.pretty_generate entity.example %>
+<%= JSON.pretty_generate entity.example if entity %>
 ```
 
-`<%= route_method %> <%= url %>` returns [<%= entity.type %>](#<%= entity.uid %>)
+`<%= route_method %> <%= url %>` returns `<%= status %>`<% if entity %> [<%= entity.type %>](#<%= entity.uid %>)<% end %>
 <% unless route_detail -%>
 
 <%= route_detail %>
