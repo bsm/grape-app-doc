@@ -1,0 +1,15 @@
+<% unless entities.empty? -%>
+# Entities <%= "<sup>#{version}</sup>" if version %>
+
+<% entities.each do |entity| -%>
+<%= render :entity, entity %>
+<% end -%>
+<% end -%>
+
+<% unless endpoints.empty? -%>
+# Endpoints <%= "<sup>#{version}</sup>" if version %>
+
+<% endpoints.each do |endpoint| -%>
+<%= render :endpoint, endpoint %>
+<% end -%>
+<% end -%>

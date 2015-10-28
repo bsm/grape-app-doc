@@ -1,0 +1,42 @@
+## <%= named %>
+
+```http
+<%= route_method %> <%= example_url %> HTTP/1.1
+User-Agent: MyClient/1.0.0
+Accept: application/json
+Authorization: Bearer YOUR-API-ACCESS-TOKEN
+```
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+<%= JSON.pretty_generate entity.example %>
+```
+
+`<%= route_method %> <%= url %>` returns [<%= entity.type %>](#<%= entity.uid %>)
+<% unless route_detail -%>
+
+<%= route_detail %>
+<% end -%>
+<% unless params.empty? -%>
+
+### Parameters:
+
+| Name | Type | Description |
+|------|------|-------------|
+<% params.each do |parameter| -%>
+<%= render :parameter, parameter -%>
+<% end -%>
+<% end -%>
+<% unless headers.empty? -%>
+
+### Headers:
+
+| Name | Description |
+|------|-------------|
+<% headers.each do |header| -%>
+<%= render :header, header -%>
+<% end -%>
+<% end -%>
+
