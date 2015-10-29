@@ -14,7 +14,7 @@ Content-Type: application/json
 <%= JSON.pretty_generate entity.example if entity %>
 ```
 
-`<%= route_method %> <%= url %>` returns `<%= status %>`<% if entity %> [<%= entity.type %>](#<%= entity.uid %>)<% end %>
+`<%= route_method %> <%= url %>` returns `<%= status %>`<% if entity %> -- [<%= entity.type %>](#<%= entity.uid %>)<% end %>
 <% unless route_detail -%>
 
 <%= route_detail %>

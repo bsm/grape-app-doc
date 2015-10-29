@@ -16,6 +16,8 @@ class Grape::App::Doc::Attribute
     def norm_type(type, is_array)
       kind = if type == BigDecimal
        "Decimal"
+      elsif type == Virtus::Attribute::Boolean
+       "Boolean"
       elsif type <= Grape::Entity
         type.meta[:type] || type.name.sub('::Entity', '')
       else
