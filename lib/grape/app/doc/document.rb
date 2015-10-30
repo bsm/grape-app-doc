@@ -1,33 +1,20 @@
 class Grape::App::Doc::Document
-  include Grape::App::Doc::Renderable
 
-  def initialize(host, api)
-    @host     = host
-    @versions = {}
+  attr_reader :entities, :endpoints
 
-    api.routes.each do |raw|
-      unless raw.route_entity
-        warn "[WARNING] unable to document route #{raw} - no `success` in route description"
-        next
-      end
-
-      version = get_version(raw.route_version)
-      version.store(raw)
+  def initialize(api = Grape::App)
+    registry   = Grape::App::Doc::Entity::Registry.new
+    @endpoints = api.routes.map do |route|
+      Grape::App::Doc::Endpoint.new(route, registry)
     end
+    @entities  = registry.values
   end
 
-  def versions
-    @versions.values.sort_by {|v| v.version.to_s }
+  # @param [String|Symbol] template path
+  # @return [String] output formatted as template
+  def output(template)
+    template = File.expand_path("../templates/#{template}.erb") unless File.exist?(template)
+    ERB.new(File.read(template), nil, '-').result(binding)
   end
-
-  def output
-    render :document, self
-  end
-
-  private
-
-    def get_version(name)
-      @versions[name] ||= Grape::App::Doc::Version.new(@host, name)
-    end
 
 end

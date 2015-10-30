@@ -1,1 +1,0 @@
-| <%= key %> | `<%= type %>` | <%= desc %><%= "<dl>" unless values.blank? && default.blank? %><%= "<dt>Values</dt>" unless values.blank? %><% for v in values %><%= "<dd>`#{v}`</dd>" %><% end %><%= "<dt>Default</dt>" unless default.blank? %><%= "<dd>`#{default}`</dd>" unless default.blank?  %><%= "</dl>" unless values.blank? && default.blank? %> |

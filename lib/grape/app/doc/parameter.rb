@@ -1,29 +1,30 @@
 class Grape::App::Doc::Parameter
-  include Grape::App::Doc::Renderable
+  attr_reader :name, :doc, :values, :default, :type, :desc
 
-  attr_reader :param, :type, :desc
-
-  def initialize(param, opts = {})
-    doc = opts[:documentation] || {}
-    @param = param
-    @type  = norm_type(doc[:type] || opts[:type], doc[:is_array])
-    @desc  = opts[:desc]
+  def initialize(name, opts = {})
+    @name     = name.to_s
+    @doc      = opts[:documentation] || {}
+    @desc     = doc[:desc] || doc[:description] || ''
+    @values   = opts[:values] || []
+    @default  = opts[:default]
+    @type     = normalize_type(doc[:type] || opts[:type])
     @required = opts[:required]
   end
 
   def required?
-    !!@required
+    @required
   end
 
   private
 
-    def norm_type(type, is_array)
-      kind = type.to_s.dup
-      kind.sub!("Virtus::Attribute::Boolean", "Boolean")
-      kind.sub!("BigDecimal", "Decimal")
-      kind.sub!(/^\[([^\]]*)\]$/, '\1[]')
-      kind = "#{kind}[]" if is_array
-      kind
+    def normalize_type(str)
+      return 'String' unless str.is_a?(String)
+
+      str = str.dup
+      str.sub! 'Virtus::Attribute::', ''
+      str.sub! 'Axiom::Types::', ''
+      str.sub! 'BigDecimal', 'Decimal'
+      str
     end
 
 end

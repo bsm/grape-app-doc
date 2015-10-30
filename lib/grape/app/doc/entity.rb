@@ -1,26 +1,31 @@
 class Grape::App::Doc::Entity
-  include Grape::App::Doc::Renderable
+  attr_reader :name, :desc, :uid, :attributes
 
-  @@next_id = 0
+  def initialize(klass, registry)
+    @name = (klass.meta[:type] if klass.respond_to?(:meta)) || klass.name.gsub('::Entity', '')
+    @desc = (klass.meta[:desc] || klass.meta[:description] if klass.respond_to?(:meta)) || ""
+    @uid  = [name.parameterize, Grape::App::Doc.next_increment!].join('-')
 
-  def self.next_id
-    @@next_id += 1
-  end
+    exposures = klass.root_exposures
+    exposures = exposures.map do |key, opts|
+      LegacyExposure.new(key, opts[:using], opts[:documentation])
+    end if klass.root_exposures.is_a?(Hash)
 
-  def initialize(entity)
-    @entity = entity
-  end
-
-  def description
-    @entity.meta[:description]
-  end
-
-  def type
-    @type ||= @entity.meta[:type] || @entity.to_s.gsub("::Entity", "")
-  end
-
-  def uid
-    @uid ||= [type.parameterize, self.class.next_id].join("-")
+    @attributes = exposures.map do |exp|
+      doc = exp.documentation.try(:dup)
+      unless doc.is_a?(Hash)
+        Grape::App::Doc.doc_error("#{klass}: #{name} exposure does not have documentation")
+        next
+      end
+      unless doc.key?(:type)
+        Grape::App::Doc.doc_error("#{klass}: #{name} exposure does not have :type documentation")
+        next
+      end
+      if exp.respond_to?(:using_class) && exp.using_class
+        registry.register(exp.using_class)
+      end
+      Grape::App::Doc::Attribute.new(exp.key, doc)
+    end.compact
   end
 
   def example
@@ -30,12 +35,11 @@ class Grape::App::Doc::Entity
     end
   end
 
-  def attributes
-    @attributes ||= @entity.root_exposures.map do |exp|
-      opts = exp.documentation.try(:dup) || {}
-      opts[:type] = exp.using_class if exp.respond_to?(:using_class)
-      Grape::App::Doc::Attribute.new(exp.key, opts) unless opts.blank?
-    end.compact
+  class Registry < Hash
+    def register(klass)
+      self[klass] ||= Grape::App::Doc::Entity.new(klass, self) if klass
+    end
   end
+  LegacyExposure = Struct.new(:key, :using_class, :documentation)
 
 end

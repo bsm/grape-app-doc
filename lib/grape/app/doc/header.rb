@@ -1,16 +1,9 @@
 class Grape::App::Doc::Header
-  include Grape::App::Doc::Renderable
+  attr_reader :name, :opts, :desc
 
-  attr_reader :header, :desc
-
-  def initialize(header, opts = {})
-    @header = header
-    @desc   = opts[:description] || opts[:desc]
-    @required = opts[:required]
+  def initialize(name, opts = {})
+    @name = name.to_s
+    @opts = opts.dup
+    @desc = opts[:desc] || opts[:description] || ""
   end
-
-  def required?
-    !!@required
-  end
-
 end

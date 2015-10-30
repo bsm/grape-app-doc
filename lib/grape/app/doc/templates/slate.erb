@@ -1,15 +1,17 @@
 <% unless entities.empty? -%>
-# Entities <%= "<sup>#{version}</sup>" if version %>
+# Entities
 
 <% entities.each do |entity| -%>
-<%= render :entity, entity %>
+<%= entity.name %>
+
 <% end -%>
 <% end -%>
 
-<% unless endpoints.empty? -%>
+<% endpoints.group_by(&:version).each do |version, endpoints| -%>
 # Endpoints <%= "<sup>#{version}</sup>" if version %>
 
 <% endpoints.each do |endpoint| -%>
-<%= render :endpoint, endpoint %>
+<%= endpoint.path %>
+
 <% end -%>
 <% end -%>
