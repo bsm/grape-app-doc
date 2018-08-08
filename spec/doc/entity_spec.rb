@@ -6,7 +6,7 @@ RSpec.describe Grape::App::Doc::Entity do
 
   its(:name) { is_expected.to eq("Post") }
   its(:desc) { is_expected.to eq("") }
-  its(:uid) { is_expected.to eq("post-1") }
+  its(:uid) { is_expected.to match(/post-\d+/) }
 
   it "should parse attributes" do
     expect(subject.attributes.size).to eq(5)

@@ -1,26 +1,26 @@
 class Grape::App::Doc::Endpoint
   Status = Struct.new(:code, :desc, :entity)
 
-  attr_reader :headers, :failure, :success, :version, :params, :method,
-              :namespace, :description, :details, :name, :raw_path
+  attr_reader :headers, :failure, :success, :version, :params, :request_method,
+              :namespace, :description, :details, :raw_path
 
   def initialize(route, registry)
-    @version     = route.route_version || ''
-    @method      = route.route_method || 'GET'
-    @namespace   = route.route_namespace || ''
-    @description = route.route_description || ''
-    @details     = route.route_details || ''
-    @name        = route.route_named
-    @raw_path    = route.route_path
+    @request_method = route.request_method || 'GET'
 
-    @success  = parse_status(route, :success, registry, route.route_success || route.route_entity || [200, "OK"])
-    @failure  = (route.route_failure || route.route_http_codes || []).map do |item|
-      parse_status(route, :failure, registry, item)
+    @version     = route.version || ''
+    @namespace   = route.namespace || ''
+    @description = route.description || ''
+    @details     = route.details || ''
+    @raw_path    = route.path
+
+    @success  = parse_status(route, registry, route.entity || [200, "OK"])
+    @failure  = Array(route.http_codes).map do |item|
+      parse_status(route, registry, item)
     end.compact
-    @headers  = (route.route_headers || {}).map do |name, opts|
+    @headers  = (route.headers || {}).map do |name, opts|
       Grape::App::Doc::Header.new(name, opts)
     end
-    @params   = (route.route_params || {}).map do |name, opts|
+    @params   = (route.params || {}).map do |name, opts|
       Grape::App::Doc::Parameter.new(name, opts) if opts.is_a?(Hash)
     end.compact
   end
@@ -38,26 +38,17 @@ class Grape::App::Doc::Endpoint
 
   private
 
-    def parse_status(route, kind, registry, item)
-      status = if entity_class?(item)
-        Status.new(200, "OK", registry.register(item))
-      elsif item.is_a?(Array) && !item.empty?
-        code = case item[0] when Integer then item[0] when Symbol then Rack::Utils::SYMBOL_TO_STATUS_CODE[item[0]] end
-        if code
-          desc  = item[1] if item[1].is_a?(String)
-          klass = item[2] if entity_class?(item[2])
-          Status.new(code, desc, registry.register(klass))
-        end
-      end
-
-      unless status
-        Grape::App::Doc.doc_error("route #{route} contains an invalid #{kind} definition #{item.inspect}")
-      end
-      status
+  def parse_status(route, registry, item)
+    if item.is_a?(Array) && item.size > 1
+      code, desc, entity = item
+      code = Rack::Utils::SYMBOL_TO_STATUS_CODE[code] if code.is_a?(Symbol)
+      Status.new(code, desc, registry.register(entity))
+    elsif item.is_a?(Class) && item <= Grape::Entity
+      Status.new(200, "OK", registry.register(item))
+    else
+      Grape::App::Doc.doc_error("route #{route} contains an invalid definition #{item.inspect}")
+      nil
     end
-
-    def entity_class?(item)
-      item.is_a?(Class) && item <= Grape::Entity
-    end
+  end
 
 end

@@ -3,19 +3,18 @@ require 'spec_helper'
 RSpec.describe Grape::App::Doc::Endpoint do
 
   let :route do
-    Grape::Route.new \
-      version: "v2015",
-      prefix: "/api",
-      namespace: "/",
-      path: "/:version/something(.:format)",
-      headers: { XAdminToken: { description: "Valdates your identity", required: true }},
-      params:  {"id"=>"", "title"=>{:required=>true, :documentation=>{:desc=>"A title"}}}
+    Grape::Router::Route.new :get, '/:version/something(.:format)',
+      version: 'v2015',
+      prefix: '/api',
+      namespace: '/',
+      headers: { XAdminToken: { description: 'Valdates your identity', required: true }},
+      params:  {'id'=>'', 'title'=>{:required=>true, :documentation=>{:desc=>'A title'}}}
   end
 
   subject { described_class.new route, Grape::App::Doc::Entity::Registry.new }
 
   it 'should parse routes with defaults' do
-    expect(subject.method).to eq('GET')
+    expect(subject.request_method).to eq('GET')
   end
 
   it 'should parse success/failures' do

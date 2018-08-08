@@ -5,7 +5,6 @@ require 'rack/utils'
 
 module Grape::App::Doc
   extend self
-  @@increment = 0
 
   def config
     Grape::App::Doc::Config
@@ -22,7 +21,8 @@ module Grape::App::Doc
   end
 
   def next_increment!
-    @@increment += 1
+    @increment ||= 0
+    @increment += 1
   end
 
   def doc_error(message)
